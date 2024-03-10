@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, forwardRef } from 'react'
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,102 +7,140 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import { AppBar, Button, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
+import Post from '../Post/Post';
+import { Close } from '@mui/icons-material';
+import { GetWithAuth } from '../../services/HttpService';
 
-const columns = [
-    {
-        id: 'UserActivity',
-        label: 'User Activity',
-        minWidth: 170,
-        format: (value) => value.toLocaleString('en-US'),
-    },
-];
+const Transition = forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
-function createData(name, code, population, size) {
-    const density = population / size;
-    return { name, code, population, size, density };
-}
+function PopUp(props) {
+    const { isOpen, postId, setIsOpen } = props;
+    const [open, setOpen] = useState(isOpen);
+    const [post, setPost] = useState();
 
-const rows = [
-    createData('India', 'IN', 1324171354, 3287263),
-    createData('China', 'CN', 1403500365, 9596961),
-    createData('Italy', 'IT', 60483973, 301340),
-    createData('United States', 'US', 327167434, 9833520),
-    createData('Canada', 'CA', 37602103, 9984670),
-    createData('Australia', 'AU', 25475400, 7692024),
-    createData('Germany', 'DE', 83019200, 357578),
-    createData('Ireland', 'IE', 4857000, 70273),
-    createData('Mexico', 'MX', 126577691, 1972550),
-    createData('Japan', 'JP', 126317000, 377973),
-    createData('France', 'FR', 67022000, 640679),
-    createData('United Kingdom', 'GB', 67545757, 242495),
-    createData('Russia', 'RU', 146793744, 17098246),
-    createData('Nigeria', 'NG', 200962417, 923768),
-    createData('Brazil', 'BR', 210147125, 8515767),
-];
+    const getPost = () => {
+        GetWithAuth("/posts/" + postId)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    console.log(result);
+                    setPost(result);
+                },
+                (error) => {
+                    console.log(error)
+                }
+            )
+    }
 
-function UserActivity() {
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
+    const handleClose = () => {
+        setOpen(false);
+        setIsOpen(false);
     };
 
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(+event.target.value);
-        setPage(0);
+
+    useEffect(() => {
+        setOpen(isOpen);
+    }, [isOpen]);
+
+    useEffect(() => {
+        getPost();
+    }, [postId])
+
+    return (
+        <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+            <AppBar sx={{ position: 'relative' }}>
+                <Toolbar>
+                    <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+                        <Close />
+                    </IconButton>
+                    <Typography variant="h6" sx={{
+                        marginLeft: 2,
+                        flex: 1,
+                    }}>
+                        Close
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            {post ? <Post likes={post.postLikes} postId={post.id} userId={post.userId} userName={post.userName}
+                title={post.title} text={post.text}></Post> : "loading"}
+        </Dialog>
+    )
+}
+
+
+function UserActivity(props) {
+    const { userId } = props;
+
+    const [error, setError] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const [isOpen, setIsOpen] = useState();
+    const [selectedPost, setSelectedPost] = useState();
+
+    const [rows, setRows] = useState([]);
+
+    const getActivity = () => {
+        GetWithAuth("/users/activity/" + userId)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    setIsLoaded(true);
+                    setRows(result);
+                },
+                (error) => {
+                    console.log(error)
+                    setIsLoaded(true);
+                    setError(error);
+                }
+            )
+    }
+
+    useEffect(() => {
+        getActivity()
+    }, [])
+
+    const handleNotification = (postId) => {
+        setSelectedPost(postId);
+        setIsOpen(true);
     };
 
     return (
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-                <Table stickyHeader aria-label="sticky table">
-                    <TableHead>
-                        <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    align={column.align}
-                                    style={{ minWidth: column.minWidth }}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((row) => {
+        <div>
+            {isOpen ? <PopUp isOpen={isOpen} postId={selectedPost} setIsOpen={setIsOpen} /> : ""}
+            <Paper sx={{ width: '100%', }}>
+                <TableContainer sx={{
+                    maxHeight: 440,
+                    minWidth: 100,
+                    maxWidth: 800,
+                    marginTop: 50,
+                }}>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                User Activity
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows.map((row) => {
                                 return (
-                                    <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                                        {columns.map((column) => {
-                                            const value = row[column.id];
-                                            return (
-                                                <TableCell key={column.id} align={column.align}>
-                                                    {column.format && typeof value === 'number'
-                                                        ? column.format(value)
-                                                        : value}
-                                                </TableCell>
-                                            );
-                                        })}
-                                    </TableRow>
+                                    <Button onClick={() => handleNotification(row[1])}>
+                                        <TableRow hover role="checkbox" tabIndex={-1} key={row.code} >
+                                            <TableCell align="right">
+                                                {row[3] + " " + row[0] + " your post"}
+                                            </TableCell>
+                                        </TableRow>
+                                    </Button>
                                 );
                             })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-        </Paper>
-    )
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
+        </div>
+    );
 }
 
 export default UserActivity

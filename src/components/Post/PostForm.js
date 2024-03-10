@@ -9,6 +9,7 @@ import { red } from '@mui/material/colors';
 import styled from "@emotion/styled";
 import { Alert, Button, InputAdornment, OutlinedInput, Snackbar } from "@mui/material";
 import { Link } from "react-router-dom";
+import { PostWithAuth } from "../../services/HttpService";
 
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -29,17 +30,10 @@ function PostForm(props) {
     const [isSent, setIsSent] = useState(false);
 
     const savePost = () => {
-        fetch("/posts", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("tokenKey"),
-            },
-            body: JSON.stringify({
-                title: title,
-                userId: userId,
-                text: text,
-            }),
+        PostWithAuth("/posts",{
+            title: title,
+            userId: userId,
+            text: text,
         })
             .then((res) => res.json())
             .catch((err) => console.log(err))

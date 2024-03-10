@@ -14,27 +14,46 @@ import styled from "@emotion/styled";
 import CommentIcon from '@mui/icons-material/Comment';
 import { Button, InputAdornment, OutlinedInput } from "@mui/material";
 import { Link } from "react-router-dom";
+import { PostWithAuth, RefreshToken } from "../../services/HttpService";
 
 function CommentForm(props) {
-    const { postId, userId, userName } = props;
+    const { postId, userId, userName, setCommentRefresh } = props;
     const [text, setText] = useState("");
 
     const saveComment = () => {
-        fetch("/comments",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": localStorage.getItem("tokenKey"),
-                },
-                body: JSON.stringify({
-                    postId: postId,
-                    userId: userId,
-                    text: text,
-                }),
+        PostWithAuth("/comments", {
+            postId: postId,
+            userId: userId,
+            text: text,
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    RefreshToken()
+                        .then((res) => {
+                            if (!res.ok) {
+                                // logout();
+                            } else {
+                                return res.json()
+                            }
+                        })
+                        .then((result) => {
+                            console.log(result)
+
+                            if (result != undefined) {
+                                localStorage.setItem("tokenKey", result.accessToken);
+                                saveComment();
+                                setCommentRefresh();
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                } else
+                    res.json()
             })
-            .then((res) => res.json())
-            .catch((err) => console.log(err))
+            .catch((err) => {
+                console.log(err)
+            })
     }
 
     const handleSubmit = () => {
