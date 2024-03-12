@@ -1,24 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import styled from "@emotion/styled";
-import CommentIcon from '@mui/icons-material/Comment';
 import { Button, InputAdornment, OutlinedInput } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PostWithAuth, RefreshToken } from "../../services/HttpService";
 
 function CommentForm(props) {
     const { postId, userId, userName, setCommentRefresh } = props;
     const [text, setText] = useState("");
+    let navigate = useNavigate();
+
+    const logout = () => {
+        localStorage.removeItem("tokenKey")
+        localStorage.removeItem("currentUser")
+        localStorage.removeItem("refreshKey")
+        localStorage.removeItem("userName")
+        navigate(0)
+      }
 
     const saveComment = () => {
         PostWithAuth("/comments", {
@@ -31,7 +30,7 @@ function CommentForm(props) {
                     RefreshToken()
                         .then((res) => {
                             if (!res.ok) {
-                                // logout();
+                                logout();
                             } else {
                                 return res.json()
                             }
@@ -41,8 +40,8 @@ function CommentForm(props) {
 
                             if (result != undefined) {
                                 localStorage.setItem("tokenKey", result.accessToken);
-                                saveComment();
                                 setCommentRefresh();
+                                saveComment();
                             }
                         })
                         .catch((err) => {
@@ -50,6 +49,9 @@ function CommentForm(props) {
                         })
                 } else
                     res.json()
+
+                setCommentRefresh();
+
             })
             .catch((err) => {
                 console.log(err)

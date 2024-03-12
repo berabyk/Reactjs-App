@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { FormControl, InputLabel, Input, Button, FormHelperText } from '@mui/material';
 import { useNavigate } from "react-router-dom";
-import { PostWithAuth } from "../../services/HttpService";
+import { PostWithoutAuth } from "../../services/HttpService";
 
 function Auth() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     let navigate = useNavigate();
 
-    // let history = useHistory();
     const handleUsername = (value) => {
         setUsername(value)
     }
@@ -18,39 +17,25 @@ function Auth() {
     }
 
     const sendRequest = (path) => {
-        PostWithAuth("/auth" + path, {
+        PostWithoutAuth("/auth/" + path, {
             userName: username,
             password: password,
         })
             .then((res) => res.json())
             .then((result) => {
-                localStorage.setItem("tokenKey", result.message);
+                localStorage.setItem("tokenKey", result.accessToken);
+                localStorage.setItem("refreshKey", result.refreshToken);
                 localStorage.setItem("currentUser", result.userId);
                 localStorage.setItem("userName", username);
+                navigate(0);
             })
             .catch((err) => console.log(err))
-
-        // PostWithoutAuth(("/auth/" + path), {
-        //     userName: username,
-        //     password: password,
-        // })
-        //     .then((res) => res.json())
-        //     .then((result) => {
-        //         localStorage.setItem("tokenKey", result.accessToken);
-        //         localStorage.setItem("refreshKey", result.refreshToken);
-        //         localStorage.setItem("currentUser", result.userId);
-        //         localStorage.setItem("userName", username)
-        //     })
-        //     .catch((err) => console.log(err))
     }
 
     const handleButton = (path) => {
         sendRequest(path);
         setUsername("");
         setPassword("");
-        console.log(localStorage);
-        navigate(0);
-        //history.go("/auth")
     }
 
     return (

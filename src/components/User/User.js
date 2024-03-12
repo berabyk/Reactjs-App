@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Avatar from "../Avatar/Avatar";
 import UserActivity from "../UserActivity/UserActivity";
-import { Grid, Stack } from "@mui/material";
+import { Grid } from "@mui/material";
 import { GetWithAuth } from "../../services/HttpService";
 
 function User() {
@@ -33,13 +33,16 @@ function User() {
             <Grid item xs={4}>
                 {
                     user
-                        ? <Avatar avatarId={user.avatar} userId={""} userName={"Username"} />
+                        ? <Avatar avatarId={user.avatar} userId={userId} userName={user.userName} />
                         : ""
                 }
             </Grid>
             <Grid item xs={8}>
-
-                <UserActivity userId={userId} />
+                {
+                    localStorage.getItem("currentUser") === userId
+                        ? <UserActivity userId={userId} />
+                        : ""
+                }
             </Grid>
         </Grid>
     )

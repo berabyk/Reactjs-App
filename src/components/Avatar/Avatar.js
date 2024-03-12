@@ -62,9 +62,13 @@ function Avatar(props) {
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    <Button size="small" color='primary' onClick={handleOpen}>
-                        Change Avatar
-                    </Button>
+                    {
+                        localStorage.getItem("currentUser") == userId
+                            ? <Button size="small" color='primary' onClick={handleOpen}>
+                                Change Avatar
+                            </Button>
+                            : ""
+                    }
                 </CardActions>
             </Card>
 

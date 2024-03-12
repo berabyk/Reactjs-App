@@ -8,6 +8,11 @@ function Home() {
     const [error, setError] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [postList, setPostList] = useState([]);
+    const [refresh, setRefresh] = useState(false);
+
+    const setPostRefresh = () => {
+        setRefresh(true);
+      }
 
     const refreshPosts = () => {
         fetch("/posts")
@@ -18,15 +23,17 @@ function Home() {
                     setPostList(result);
                 },
                 (error) => {
+                    console.log(error);
                     setIsLoaded(true);
                     setError(error);
                 }
             )
+            setRefresh(false);
     }
 
     useEffect(() => {
         refreshPosts();
-    }, []);
+    }, [refresh]);
 
     if (error) {
         return <div>error!!</div>;
@@ -50,7 +57,7 @@ function Home() {
                 {
                     localStorage.getItem("currentUser") == null
                         ? ""
-                        : <PostForm userId={localStorage.getItem("currentUser")} userName={localStorage.getItem("userName")} refreshPosts={refreshPosts} />
+                        : <PostForm userId={localStorage.getItem("currentUser")} userName={localStorage.getItem("userName")} refreshPosts={setPostRefresh} />
                 }
                 {postList.map(post => (
                     <Post
