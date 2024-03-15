@@ -8,8 +8,8 @@ import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
 import styled from "@emotion/styled";
 import { Alert, Button, InputAdornment, OutlinedInput, Snackbar } from "@mui/material";
-import { Link } from "react-router-dom";
-import { PostWithAuth } from "../../services/HttpService";
+import { Link, useNavigate } from "react-router-dom";
+import { PostWithAuth, RefreshToken } from "../../services/HttpService";
 
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -28,15 +28,51 @@ function PostForm(props) {
     const [title, setTitle] = useState("");
     const [text, setText] = useState("");
     const [isSent, setIsSent] = useState(false);
+    let navigate = useNavigate();
 
+    const logout = () => {
+        localStorage.removeItem("tokenKey");
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("refreshKey");
+        localStorage.removeItem("userName");
+        navigate("/auth");
+        navigate(0);
+      }
+      
     const savePost = () => {
-        PostWithAuth("/posts",{
+        PostWithAuth("/posts", {
             title: title,
             userId: userId,
             text: text,
         })
-            .then((res) => res.json())
-            .catch((err) => console.log(err))
+        .then((res) => {
+            if (!res.ok) {
+                RefreshToken()
+                    .then((res) => {
+                        if (!res.ok) {
+                            logout();
+                        } else {
+                            return res.json()
+                        }
+                    })
+                    .then((result) => {
+                        console.log(result)
+
+                        if (result != undefined) {
+                            localStorage.setItem("tokenKey", result.accessToken);
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            } else
+                res.json()
+        })
+            .catch((err) => {
+                // if(err.status)
+                console.log(err.status);
+                console.log(err)
+            })
     }
 
     const handleSubmit = () => {

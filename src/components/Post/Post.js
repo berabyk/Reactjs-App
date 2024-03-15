@@ -11,11 +11,11 @@ import { red } from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import styled from "@emotion/styled";
 import CommentIcon from '@mui/icons-material/Comment';
-import {Container } from "@mui/material";
+import { Container } from "@mui/material";
 import { Link } from "react-router-dom";
 import Comment from "../Comment/Comment";
 import CommentForm from "../Comment/CommentForm";
-import { DeleteWithAuth, PostWithAuth } from "../../services/HttpService";
+import { DeleteWithAuth, GetWithAuth, PostWithAuth, PostWithoutAuth } from "../../services/HttpService";
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -29,16 +29,18 @@ const ExpandMore = styled((props) => {
 }));
 
 function Post(props) {
-  const { postId, title, text, userId, userName, likes } = props;
+  const { postId, title, text, userId, userName } = props;
   const [expanded, setExpanded] = React.useState(false);
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [commentList, setCommentList] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const isInitialMount = useRef(true);
-  const [likeCount, setLikeCount] = useState(likes.length);
+  const [likeCount, setLikeCount] = useState(0);
   const [likeId, setLikeId] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [likeRefresh, setLikeRefresh] = useState(false);
+  const [likes, setLikes] = useState([]);
 
   let disabled = localStorage.getItem("currentUser") == null ? true : false;
 
@@ -94,8 +96,38 @@ function Post(props) {
 
   }
 
+  useEffect(() => {
+    getLikes();
+  }, [likeRefresh]);
+
+  const setPostRefresh = () => {
+    setRefresh(true);
+  }
+
+  const getLikes = () => {
+    fetch("/likes?postId=" + postId)
+      .then((res) => {
+        console.log(res);
+
+        return res.json();
+      }).then(
+        (result) => {
+          console.log("aa");
+          console.log(result);
+          setLikeCount(result.length)
+          setLikes(result);
+          console.log(likes);
+          setPostRefresh();
+        }
+      )
+      .catch((err) => console.log(err));
+    setLikeRefresh(false);
+  }
+
   const checkLikes = () => {
     var likeControl = likes.find((like => like.userId == localStorage.getItem("currentUser")));
+    console.log(localStorage.getItem("currentUser"));
+    console.log(likeControl);
     if (likeControl != null) {
       setLikeId(likeControl.id);
       setIsLiked(true);
@@ -104,7 +136,7 @@ function Post(props) {
 
   useEffect(() => {
     checkLikes();
-  }, []);
+  }, [likes]);
 
   useEffect(() => {
     if (isInitialMount.current)

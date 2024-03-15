@@ -12,11 +12,12 @@ function CommentForm(props) {
     let navigate = useNavigate();
 
     const logout = () => {
-        localStorage.removeItem("tokenKey")
-        localStorage.removeItem("currentUser")
-        localStorage.removeItem("refreshKey")
-        localStorage.removeItem("userName")
-        navigate(0)
+        localStorage.removeItem("tokenKey");
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("refreshKey");
+        localStorage.removeItem("userName");
+        navigate("/auth");
+        navigate(0);
       }
 
     const saveComment = () => {
