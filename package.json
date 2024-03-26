@@ -41,6 +41,7 @@
       "last 1 safari version"
     ]
   },
+  
   "proxy": "https://spring-boot-app3-berabyk-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com",
   "now-build": "react-scripts build && mv build dist"
 }
