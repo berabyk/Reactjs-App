@@ -65,7 +65,7 @@ function Post(props) {
   }
 
   const refreshComments = () => {
-    fetch("/comments?postId=" + postId)
+    fetch("/api/comments?postId=" + postId)
       .then(res => res.json())
       .then(
         (result) => {
@@ -105,7 +105,7 @@ function Post(props) {
   }
 
   const getLikes = () => {
-    fetch("/likes?postId=" + postId)
+    fetch("/api/likes?postId=" + postId)
       .then((res) => {
         console.log(res);
 
