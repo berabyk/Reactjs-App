@@ -1,5 +1,8 @@
 {
-    "rewrites": [
-      { "source": "/api/:path*", "destination": "https://spring-boot-app3-berabyk-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/:path*" }
-    ]
-  }
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://beraverse.oa.r.appspot.com/:path*"
+    }
+  ]
+}

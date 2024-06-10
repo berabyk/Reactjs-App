@@ -51,7 +51,6 @@ function Home() {
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    backgroundColor: "#f0f5ff",
                 }}
             >
                 {
