@@ -103,7 +103,6 @@ function CommentForm(props) {
                         </Button>
                     </InputAdornment>
                 }
-                style={{ color: "black", backgroundColor: 'white' }}
             ></OutlinedInput>
         </CardContent>
     )

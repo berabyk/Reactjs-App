@@ -33,7 +33,6 @@ function Comment(props) {
                         </Link>
                     </InputAdornment>
                 }
-                style={{ color: "black", backgroundColor: 'white' }}
             ></OutlinedInput>
         </CardContent>
     )
